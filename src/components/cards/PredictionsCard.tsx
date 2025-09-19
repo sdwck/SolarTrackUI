@@ -15,6 +15,8 @@ interface PredictionsCardProps {
     loading?: boolean;
 }
 
+const predictionPeriods = ['tomorrow', 'week', 'month'];
+
 export function PredictionsCard({
     predictions,
     loading = false,
@@ -89,7 +91,7 @@ export function PredictionsCard({
                 </Box>
 
                 <Stack spacing={1.5}>
-                    {predictions.map((prediction) => (
+                    {predictions.filter(x => predictionPeriods.includes(x.period)).map((prediction) => (
                         <Box
                             key={prediction.period}
                             sx={{

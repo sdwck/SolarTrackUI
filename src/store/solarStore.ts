@@ -184,8 +184,11 @@ export const useSolarStore = create<SolarState>()(
             fetchPredictions: async () => {
                 try {
                     set({ loading: true, error: null });
-                    await new Promise(resolve => setTimeout(resolve, 400));
-                    set({ predictions: mockPredictions, loading: false });
+                    const todayData = await api.getPredictionData('today');
+                    const tomorrowData = await api.getPredictionData('tomorrow');
+                    const weekData = await api.getPredictionData('week');
+                    const monthData = await api.getPredictionData('month');
+                    set({ predictions: [todayData, tomorrowData, weekData, monthData], loading: false });
                 } catch (error) {
                     const apiError = error as ApiError;
                     set({ error: apiError, loading: false });

@@ -93,9 +93,9 @@ class ApiService {
         return response.data;
     }
 
-    async getMaintenanceTasks(status?: string, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<MaintenanceTask>> {
+    async getMaintenanceTasks(filter?: string, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<MaintenanceTask>> {
         const response = await this.client.get<PaginatedResponse<MaintenanceTask>>('/Maintenance', {
-            params: { status, page, pageSize }
+            params: { filter, page, pageSize }
         });
         return response.data;
     }
