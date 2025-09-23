@@ -15,3 +15,6 @@ export * from './MaintenanceTaskStats';
 export * from './UpdateMaintenanceTaskRequest';
 export * from './AnalyticsData';
 export * from './HistoryData';
+export * from './User';
+export * from './LoginRequest';
+export * from './AuthResponse';

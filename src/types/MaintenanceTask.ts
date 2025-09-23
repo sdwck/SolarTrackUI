@@ -4,11 +4,11 @@ export interface MaintenanceTask {
     description: string;
     priority: 'low' | 'medium' | 'high';
     status: 'pending' | 'in_progress' | 'completed' | 'overdue';
-    dueDate: string; // ISO string
-    createdAt: string; // ISO string
-    completedAt?: string; // ISO string
+    dueDate: string;
+    createdAt: string;
+    completedAt?: string;
     category: 'cleaning' | 'inspection' | 'repair' | 'upgrade' | 'calibration' | 'other';
-    estimatedDuration?: number; // minutes
+    estimatedDuration?: number;
     assignedTo?: string;
     notes?: string;
     tags?: string[];

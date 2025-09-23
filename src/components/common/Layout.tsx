@@ -18,22 +18,27 @@ import {
     Avatar,
     Switch,
     Divider,
-    Badge,
+    Menu,
+    MenuItem,
+    ListItemAvatar,
+    Chip,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
     ViewList as ListIcon,
     Analytics as AnalyticsIcon,
-    Settings as SettingsIcon,
     LightMode,
     DarkMode,
-    Notifications as NotificationsIcon,
     WbSunny as SolarIcon,
     Build as BuildIcon,
+    AccountCircle,
+    Logout,
+    Person,
 } from '@mui/icons-material';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import { BatteryFull as BatteryFullIcon } from '@mui/icons-material';
+import { useAuth } from '../../hooks/useAuth';
 
 const drawerWidth = 280;
 
@@ -51,14 +56,15 @@ const navigationItems: NavigationItem[] = [
     { text: 'Maintenance', path: '/maintenance', icon: <BuildIcon /> },
     { text: 'Battery', path: '/battery', icon: <BatteryFullIcon /> },
     { text: 'History', path: '/history', icon: <ListIcon /> },
-    { text: 'Settings', path: '/settings', icon: <SettingsIcon /> },
 ];
 
 export function Layout() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
     const { mode, toggleTheme } = useThemeMode();
+    const { user, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -72,6 +78,20 @@ export function Layout() {
         if (isMobile) {
             setMobileOpen(false);
         }
+    };
+
+    const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setUserMenuAnchor(event.currentTarget);
+    };
+
+    const handleUserMenuClose = () => {
+        setUserMenuAnchor(null);
+    };
+
+    const handleLogout = () => {
+        logout();
+        handleUserMenuClose();
+        navigate('/login');
     };
 
     const drawer = (
@@ -118,13 +138,7 @@ export function Layout() {
                                         minWidth: 40,
                                     }}
                                 >
-                                    {item.badge ? (
-                                        <Badge badgeContent={item.badge} color="error">
-                                            {item.icon}
-                                        </Badge>
-                                    ) : (
-                                        item.icon
-                                    )}
+                                    {item.icon}
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.text}
@@ -137,11 +151,35 @@ export function Layout() {
                     );
                 })}
             </List>
-
             <Box sx={{ flexGrow: 1 }} />
-
             <Box sx={{ p: 3 }}>
                 <Divider sx={{ mb: 2 }} />
+
+                <Box
+                    sx={{
+                        mb: 3,
+                        p: 2,
+                        borderRadius: 2,
+                        bgcolor: 'background.paper',
+                        border: 1,
+                        borderColor: 'divider'
+                    }}
+                >
+                    <Box display="flex" alignItems="center" gap={1.5}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>
+                            <Person fontSize="small" />
+                        </Avatar>
+                        <Box flexGrow={1} sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={600} noWrap>
+                                {user?.username || 'User'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                                {user?.email || ''}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Box>
+
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Box display="flex" alignItems="center" gap={1}>
                         <LightMode sx={{ fontSize: 20, color: 'text.secondary' }} />
@@ -187,11 +225,81 @@ export function Layout() {
 
                     <Box sx={{ flexGrow: 1 }} />
 
-                    <IconButton color="inherit">
-                        <Badge badgeContent={3} color="error">
-                            <NotificationsIcon />
-                        </Badge>
+                    <IconButton
+                        color="inherit"
+                        onClick={handleUserMenuOpen}
+                        sx={{
+                            p: 0,
+                            '&:hover': {
+                                bgcolor: 'action.hover',
+                            },
+                        }}
+                    >
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}>
+                            <AccountCircle />
+                        </Avatar>
                     </IconButton>
+
+                    <Menu
+                        anchorEl={userMenuAnchor}
+                        open={Boolean(userMenuAnchor)}
+                        onClose={handleUserMenuClose}
+                        onClick={handleUserMenuClose}
+                        PaperProps={{
+                            elevation: 3,
+                            sx: {
+                                overflow: 'visible',
+                                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                mt: 1.5,
+                                minWidth: 200,
+                                '& .MuiAvatar-root': {
+                                    width: 32,
+                                    height: 32,
+                                    ml: -0.5,
+                                    mr: 1,
+                                },
+                                '&:before': {
+                                    content: '""',
+                                    display: 'block',
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 14,
+                                    width: 10,
+                                    height: 10,
+                                    bgcolor: 'background.paper',
+                                    transform: 'translateY(-50%) rotate(45deg)',
+                                    zIndex: 0,
+                                },
+                            },
+                        }}
+                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                    >
+                        <MenuItem>
+                            <ListItemAvatar>
+                                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                    <Person fontSize="small" />
+                                </Avatar>
+                            </ListItemAvatar>
+                            <Box>
+                                <Typography variant="body2" fontWeight={600}>
+                                    {user?.username}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    {user?.email}
+                                </Typography>
+                            </Box>
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem onClick={handleLogout}>
+                            <ListItemIcon>
+                                <Logout fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText>
+                                <Typography variant="body2">Logout</Typography>
+                            </ListItemText>
+                        </MenuItem>
+                    </Menu>
                 </Toolbar>
             </AppBar>
 
@@ -212,6 +320,7 @@ export function Layout() {
                         '& .MuiDrawer-paper': {
                             boxSizing: 'border-box',
                             width: drawerWidth,
+                            height: '100%',
                         },
                     }}
                 >
