@@ -21,7 +21,6 @@ import {
     Menu,
     MenuItem,
     ListItemAvatar,
-    Chip,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -35,6 +34,7 @@ import {
     AccountCircle,
     Logout,
     Person,
+    ControlCamera,
 } from '@mui/icons-material';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import { BatteryFull as BatteryFullIcon } from '@mui/icons-material';
@@ -51,6 +51,7 @@ interface NavigationItem {
 
 const navigationItems: NavigationItem[] = [
     { text: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+    { text: 'Controls', path: '/control', icon: <ControlCamera /> },
     { text: 'Analytics', path: '/analytics', icon: <AnalyticsIcon /> },
     { text: 'Diagnostics', path: '/diagnostics', icon: <SolarIcon /> },
     { text: 'Maintenance', path: '/maintenance', icon: <BuildIcon /> },

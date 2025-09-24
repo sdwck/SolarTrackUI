@@ -21,36 +21,25 @@ interface VoltageStabilityChartProps {
     loading: boolean;
 }
 
-const generateMockVoltageData = () => {
-    const data = [];
-    const now = new Date();
-
-    for (let i = 23; i >= 0; i--) {
-        const time = new Date(now.getTime() - i * 60 * 60 * 1000);
-        const busBase = 428 + Math.sin(i * 0.2) * 10 + Math.random() * 8;
-        const batteryBase = 27.2 + Math.sin(i * 0.15) * 1.5 + Math.random() * 0.5;
-        const acInputBase = 238 + Math.sin(i * 0.25) * 5 + Math.random() * 4;
-        const acOutputBase = 230 + Math.sin(i * 0.18) * 3 + Math.random() * 2;
-
-        data.push({
-            timestamp: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            busVoltage: Math.round(busBase * 10) / 10,
-            batteryVoltage: Math.round(batteryBase * 10) / 10,
-            acInputVoltage: Math.round(acInputBase * 10) / 10,
-            acOutputVoltage: Math.round(acOutputBase * 10) / 10,
-            time: time.toISOString()
-        });
-    }
-
-    return data;
-};
-
 export const VoltageStabilityChart = ({ data, loading }: VoltageStabilityChartProps) => {
     const theme = useTheme();
-    const chartData = data.length > 0 ? data : generateMockVoltageData();
 
-    const busVariance = Math.max(...chartData.map(d => d.busVoltage)) - Math.min(...chartData.map(d => d.busVoltage));
-    const batteryVariance = Math.max(...chartData.map(d => d.batteryVoltage)) - Math.min(...chartData.map(d => d.batteryVoltage));
+    const todaysData = data
+        .filter(d => {
+            const date = new Date(d.timestamp);
+            return date >= new Date(Date.now() - 24 * 60 * 60 * 1000);
+        })
+        .map(d => ({
+            ...d,
+            timestamp: new Date(d.timestamp).toLocaleString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            })
+        }));
+
+    const busVariance = Math.max(...todaysData.map(d => d.busVoltage)) - Math.min(...todaysData.map(d => d.busVoltage));
+    const batteryVariance = Math.max(...todaysData.map(d => d.batteryVoltage)) - Math.min(...todaysData.map(d => d.batteryVoltage));
 
     if (loading) {
         return (
@@ -99,7 +88,7 @@ export const VoltageStabilityChart = ({ data, loading }: VoltageStabilityChartPr
 
                 <Box sx={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <LineChart data={todaysData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
                             <XAxis
                                 dataKey="timestamp"

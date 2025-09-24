@@ -1,1 +1,0 @@
-export type PanelStatus = 'active' | 'maintenance' | 'offline' | 'error';

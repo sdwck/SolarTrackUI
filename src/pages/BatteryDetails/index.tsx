@@ -51,7 +51,7 @@ interface BatteryChartData {
     capacity: number;
     chargingCurrent: number;
     dischargeCurrent: number;
-    efficiency: number;
+    healthScore: number;
 }
 
 const BatteryStatsCard = ({ title, value, unit, icon, color, trend, loading }: BatteryStatsCardProps) => {
@@ -143,6 +143,14 @@ const computeDomain = (values: number[], allowNegative = false): [number, number
 };
 
 const BatteryVoltageChart = ({ data, loading }: { data: BatteryChartData[]; loading: boolean }) => {
+    const showDays = (() => {
+        if (!data.length) return false;
+        const start = new Date(data[0].time).getTime();
+        const end = new Date(data[data.length - 1].time).getTime();
+        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+        return diffDays > 2;
+    })();
+
     if (loading) {
         return (
             <Card>
@@ -174,7 +182,16 @@ const BatteryVoltageChart = ({ data, loading }: { data: BatteryChartData[]; load
                                 fontSize={12}
                                 tickFormatter={(value) => {
                                     const date = new Date(value);
-                                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                                    const formattedDate = date.toLocaleTimeString([], {
+                                        month: showDays ? 'short' : undefined,
+                                        day: showDays ? 'numeric' : undefined,
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    });
+
+                                    if (showDays) return formattedDate.split(',')[0];
+                                    return formattedDate;
                                 }}
                             />
                             <YAxis fontSize={12} domain={[minV, maxV]} />
@@ -215,6 +232,14 @@ const BatteryCapacityChart = ({ data, loading }: { data: BatteryChartData[]; loa
     const caps = data.map(d => d.capacity);
     const [minC, maxC] = computeDomain(caps, false);
 
+    const showDays = (() => {
+        if (!data.length) return false;
+        const start = new Date(data[0].time).getTime();
+        const end = new Date(data[data.length - 1].time).getTime();
+        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+        return diffDays > 1;
+    })();
+
     return (
         <Card>
             <CardContent>
@@ -230,7 +255,16 @@ const BatteryCapacityChart = ({ data, loading }: { data: BatteryChartData[]; loa
                                 fontSize={12}
                                 tickFormatter={(value) => {
                                     const date = new Date(value);
-                                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                                    const formattedDate = date.toLocaleTimeString([], {
+                                        month: showDays ? 'short' : undefined,
+                                        day: showDays ? 'numeric' : undefined,
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    });
+
+                                    if (showDays) return formattedDate.split(',')[0];
+                                    return formattedDate;
                                 }}
                             />
                             <YAxis fontSize={12} domain={[minC, maxC]} />
@@ -254,8 +288,14 @@ const BatteryCapacityChart = ({ data, loading }: { data: BatteryChartData[]; loa
 const CurrentFlowChart = ({ data, loading }: { data: BatteryChartData[]; loading: boolean }) => {
     if (loading) {
         return (
-            <Card>
-                <CardContent>
+
+            <Card sx={{
+                minHeight: { xs: undefined, md: 420 },
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+            }}>
+                <CardContent sx={{ flexGrow: 1 }}>
                     <Skeleton variant="text" width="40%" height={24} sx={{ mb: 2 }} />
                     <Box display="flex" justifyContent="flex-end">
                         <Skeleton variant="rectangular" height={200} sx={{ mb: 4.5, width: { xs: '83%', sm: '92%', md: '88%' } }} />
@@ -266,6 +306,7 @@ const CurrentFlowChart = ({ data, loading }: { data: BatteryChartData[]; loading
                     </Box>
                 </CardContent>
             </Card>
+
         );
     }
 
@@ -280,13 +321,26 @@ const CurrentFlowChart = ({ data, loading }: { data: BatteryChartData[]; loading
     const avgCharge = chargingNums.length ? Math.round((chargingNums.reduce((a, b) => a + b, 0) / chargingNums.length) * 10) / 10 : 0;
     const avgDischarge = dischargingNums.length ? Math.round((dischargingNums.reduce((a, b) => a + b, 0) / dischargingNums.length) * 10) / 10 : 0;
 
+    const showDays = (() => {
+        if (!data.length) return false;
+        const start = new Date(data[0].time).getTime();
+        const end = new Date(data[data.length - 1].time).getTime();
+        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+        return diffDays > 2;
+    })();
+
     return (
-        <Card>
-            <CardContent>
+        <Card sx={{
+            minHeight: { xs: undefined, md: 420 },
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+        }}>
+            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Typography variant="h6" fontWeight={600} gutterBottom>
                     Current Flow Analysis
                 </Typography>
-                <Box sx={{ width: '100%', height: 240 }}>
+                <Box sx={{ width: '100%', height: 240, flexGrow: 1 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -295,7 +349,16 @@ const CurrentFlowChart = ({ data, loading }: { data: BatteryChartData[]; loading
                                 fontSize={12}
                                 tickFormatter={(value) => {
                                     const date = new Date(value);
-                                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                                    const formattedDate = date.toLocaleTimeString([], {
+                                        month: showDays ? 'short' : undefined,
+                                        day: showDays ? 'numeric' : undefined,
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    });
+
+                                    if (showDays) return formattedDate.split(',')[0];
+                                    return formattedDate;
                                 }}
                             />
                             <YAxis fontSize={12} domain={[minI, maxI]} />
@@ -331,7 +394,7 @@ const CurrentFlowChart = ({ data, loading }: { data: BatteryChartData[]; loading
     );
 };
 
-const BatteryHealthPieChart = ({ data, loading }: { data: BatteryChartData[]; loading: boolean }) => {
+const BatteryPerformanceChart = ({ data, loading }: { data: BatteryChartData[]; loading: boolean }) => {
     const theme = useTheme();
 
     if (loading || data.length === 0) {
@@ -339,64 +402,196 @@ const BatteryHealthPieChart = ({ data, loading }: { data: BatteryChartData[]; lo
             <Card>
                 <CardContent>
                     <Skeleton variant="text" width="40%" height={28} sx={{ mb: 6 }} />
-                    <Skeleton variant="circular" width={160} height={160} sx={{ mx: 'auto' }} />
-                    <Box display="flex" justifyContent="center" gap={2} mt={7}>
-                        <Skeleton variant="rounded" width={130} height={24} />
-                        <Skeleton variant="rounded" width={130} height={24} />
+                    <Skeleton variant="rectangular" width="100%" height={200} sx={{ mb: 4 }} />
+                    <Box display="flex" justifyContent="center" gap={2}>
+                        <Skeleton variant="rounded" width={120} height={24} />
+                        <Skeleton variant="rounded" width={120} height={24} />
+                        <Skeleton variant="rounded" width={120} height={24} />
                     </Box>
                 </CardContent>
             </Card>
         );
     }
 
-    const avgEfficiency = data.reduce((sum, item) => sum + item.efficiency, 0) / data.length;
-    const avgVoltage = Math.round(data.reduce((s, i) => s + i.voltage, 0) / data.length * 10) / 10;
+    const calculateBatteryInsights = () => {
+        if (data.length === 0) return { activity: 0, stability: 0, utilization: 0, trend: 'stable' };
 
-    const pieData = [
-        { name: 'Efficiency', value: Math.round(avgEfficiency), color: theme.palette.success.main },
-        { name: 'Loss', value: Math.round(100 - avgEfficiency), color: theme.palette.error.main },
+        const totalActivity = data.reduce((sum, item) =>
+            sum + Math.abs(item.chargingCurrent) + Math.abs(item.dischargeCurrent), 0
+        );
+        const activityScore = Math.min(100, (totalActivity / data.length) * 10);
+
+        const voltages = data.map(d => d.voltage);
+        const avgVoltage = voltages.reduce((s, v) => s + v, 0) / voltages.length;
+        const voltageVariance = voltages.reduce((sum, v) => sum + Math.pow(v - avgVoltage, 2), 0) / voltages.length;
+        const stabilityScore = Math.max(0, 100 - (voltageVariance * 50));
+
+        const capacityChanges = [];
+        for (let i = 1; i < data.length; i++) {
+            capacityChanges.push(Math.abs(data[i].capacity - data[i - 1].capacity));
+        }
+        const avgCapacityChange = capacityChanges.length > 0 ?
+            capacityChanges.reduce((s, c) => s + c, 0) / capacityChanges.length : 0;
+        const utilizationScore = Math.min(100, avgCapacityChange * 5);
+
+        const firstHalf = data.slice(0, Math.floor(data.length / 2));
+        const secondHalf = data.slice(Math.floor(data.length / 2));
+        const firstAvgCapacity = firstHalf.reduce((s, d) => s + d.capacity, 0) / firstHalf.length;
+        const secondAvgCapacity = secondHalf.reduce((s, d) => s + d.capacity, 0) / secondHalf.length;
+
+        let trend = 'stable';
+        if (secondAvgCapacity > firstAvgCapacity + 2) trend = 'charging';
+        else if (secondAvgCapacity < firstAvgCapacity - 2) trend = 'discharging';
+
+        return {
+            activity: Math.round(activityScore),
+            stability: Math.round(stabilityScore),
+            utilization: Math.round(utilizationScore),
+            trend
+        };
+    };
+
+    const insights = calculateBatteryInsights();
+
+    const performanceData = [
+        {
+            name: 'Activity',
+            score: insights.activity,
+            color: theme.palette.info.main,
+            description: 'Charging/Discharging frequency'
+        },
+        {
+            name: 'Stability',
+            score: insights.stability,
+            color: theme.palette.success.main,
+            description: 'Voltage consistency'
+        },
+        {
+            name: 'Utilization',
+            score: insights.utilization,
+            color: theme.palette.warning.main,
+            description: 'Capacity usage patterns'
+        }
     ];
+
+    const getTrendIcon = (trend: string) => {
+        switch (trend) {
+            case 'charging': return '⚡';
+            case 'discharging': return '🔋';
+            default: return '📊';
+        }
+    };
+
+    const getTrendColor = (trend: string) => {
+        switch (trend) {
+            case 'charging': return theme.palette.success.main;
+            case 'discharging': return theme.palette.warning.main;
+            default: return theme.palette.info.main;
+        }
+    };
 
     return (
         <Card>
             <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Battery Health Overview
-                </Typography>
-                <Box sx={{ width: '100%', height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={40}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                                label={({ name, value }) => `${name}: ${value}%`}
-                            >
-                                {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip formatter={(value: number, name: NameType) => [`${value}%`, name]} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </Box>
-                <Box display="flex" justifyContent="center" gap={2} mt={2}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Typography variant="h6" fontWeight={600}>
+                        Battery Performance Analytics
+                    </Typography>
                     <Chip
-                        label={`Avg Voltage: ${avgVoltage}V`}
-                        variant="outlined"
-                        size="small"
-                    />
-                    <Chip
-                        label={`Avg Efficiency: ${Math.round(avgEfficiency)}%`}
-                        variant="outlined"
-                        size="small"
-                        color={avgEfficiency > 85 ? 'success' : avgEfficiency > 70 ? 'warning' : 'error'}
+                        label={`${getTrendIcon(insights.trend)} ${insights.trend.charAt(0).toUpperCase() + insights.trend.slice(1)}`}
+                        sx={{ bgcolor: getTrendColor(insights.trend), color: 'white' }}
                     />
                 </Box>
+
+                <Box sx={{ mb: 4 }}>
+                    {performanceData.map((metric) => (
+                        <Box key={metric.name} sx={{ mb: 3 }}>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                                <Typography variant="body2" fontWeight={500}>
+                                    {metric.name}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {metric.score}/100
+                                </Typography>
+                            </Box>
+                            <LinearProgress
+                                variant="determinate"
+                                value={metric.score}
+                                sx={{
+                                    height: 8,
+                                    borderRadius: 4,
+                                    bgcolor: theme.palette.grey[200],
+                                    '& .MuiLinearProgress-bar': {
+                                        borderRadius: 4,
+                                        bgcolor: metric.color,
+                                    },
+                                }}
+                            />
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                                {metric.description}
+                            </Typography>
+                        </Box>
+                    ))}
+                </Box>
+
+                <Box sx={{ bgcolor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100], p: 2, borderRadius: 2 }}>
+                    <Typography variant="subtitle2" fontWeight={600} mb={2}>
+                        Performance Summary
+                    </Typography>
+                    <Grid container spacing={2}>
+                        <Grid size={4}>
+                            <Box textAlign="center">
+                                <Typography variant="h4" fontWeight={700} color="primary.main">
+                                    {Math.round((insights.activity + insights.stability + insights.utilization) / 3)}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    Overall Score
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid size={8}>
+                            <Box>
+                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                    <strong>Status:</strong> {
+                                        insights.stability > 80 ? 'Excellent stability' :
+                                            insights.stability > 60 ? 'Good performance' : 'Needs attention'
+                                    }
+                                </Typography>
+                                <Typography variant="body2">
+                                    <strong>Usage:</strong> {
+                                        insights.activity > 50 ? 'High activity detected' :
+                                            insights.activity > 20 ? 'Moderate usage' : 'Low activity period'
+                                    }
+                                </Typography>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </Box>
+
+                {insights.stability > 90 || insights.activity > 70 || insights.utilization > 60 || insights.stability < 50 || data.every(d => d.chargingCurrent === 0 && d.dischargeCurrent === 0) ? (
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="subtitle2" fontWeight={600} mb={1}>
+                            Smart Insights
+                        </Typography>
+                        <Box display="flex" gap={1} flexWrap="wrap">
+                            {insights.stability > 90 && (
+                                <Chip label="🟢 Voltage Very Stable" size="small" color="success" variant="outlined" />
+                            )}
+                            {insights.activity > 70 && (
+                                <Chip label="⚡ High Activity Period" size="small" color="info" variant="outlined" />
+                            )}
+                            {insights.utilization > 60 && (
+                                <Chip label="🔄 Good Utilization" size="small" color="primary" variant="outlined" />
+                            )}
+                            {insights.stability < 50 && (
+                                <Chip label="⚠️ Check Connections" size="small" color="warning" variant="outlined" />
+                            )}
+                            {data.every(d => d.chargingCurrent === 0 && d.dischargeCurrent === 0) && (
+                                <Chip label="😴 Battery Idle" size="small" color="default" variant="outlined" />
+                            )}
+                        </Box>
+                    </Box>
+                ) : null}
             </CardContent>
         </Card>
     );
@@ -449,6 +644,18 @@ export default function BatteryDetails() {
         setCustomRange({ from: toLocalDateTimeInput(start), to: toLocalDateTimeInput(end) });
     };
 
+    const calculateBatteryHealth = (batteryData: BatteryData): number => {
+        const { batteryVoltage, batteryCapacity } = batteryData;
+
+        let voltageScore = 100;
+        if (batteryVoltage < 24) voltageScore = 50;
+        else if (batteryVoltage < 25) voltageScore = 70;
+        else if (batteryVoltage > 29) voltageScore = 80;
+
+        let capacityScore = batteryCapacity;
+        return Math.round((voltageScore * 0.3 + capacityScore * 0.7));
+    };
+
     const fetchBatteryData = async () => {
         try {
             setError(null);
@@ -484,23 +691,22 @@ export default function BatteryDetails() {
                 setCurrentBattery(latestResponse.batteryData);
             }
 
-            const calculateEfficiency = (powerData: PowerData): number => {
-                if (!powerData.pvInputPower || !powerData.acOutputActivePower) return 0;
-                if (powerData.pvInputPower === 0) return 0;
-                return Math.round((powerData.acOutputActivePower / powerData.pvInputPower) * 100);
-            };
-
             if (rangeResponse && rangeResponse.length > 0) {
                 rangeResponse.sort((a: SolarData, b: SolarData) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
                 let chartData: BatteryChartData[] = rangeResponse
-                    .filter((item: SolarData) => item.batteryData && item.batteryData.batteryVoltage !== undefined && item.batteryData.batteryCapacity !== 0)
+                    .filter((item: SolarData) =>
+                        item.batteryData &&
+                        item.batteryData.batteryVoltage !== undefined &&
+                        item.batteryData.batteryCapacity !== 0 &&
+                        item.batteryData.batteryVoltage > 0
+                    )
                     .map((item: SolarData) => ({
                         time: new Date(item.timestamp).toLocaleString(),
                         voltage: item.batteryData!.batteryVoltage,
                         capacity: item.batteryData!.batteryCapacity,
                         chargingCurrent: item.batteryData!.batteryChargingCurrent,
                         dischargeCurrent: item.batteryData!.batteryDischargeCurrent,
-                        efficiency: calculateEfficiency(item.powerData),
+                        healthScore: calculateBatteryHealth(item.batteryData!),
                     }));
 
                 const maxPoints = (() => {
@@ -756,7 +962,7 @@ export default function BatteryDetails() {
                         <CurrentFlowChart data={batteryHistory} loading={loading} />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                        <BatteryHealthPieChart data={batteryHistory} loading={loading} />
+                        <BatteryPerformanceChart data={batteryHistory} loading={loading} />
                     </Grid>
                 </Grid>
 

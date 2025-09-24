@@ -1,4 +1,3 @@
-import { type AxiosInstance } from 'axios';
 import axios from '../utils/axiosConfig';
 import {
     type SolarData,
@@ -13,6 +12,7 @@ import {
     type SystemMetrics,
     type AnalyticsData,
     type HistoryData,
+    type SystemMode
 } from '../types';
 
 class ApiService {
@@ -116,6 +116,23 @@ class ApiService {
             params: { timeRange, from, to }
         });
         return response.data;
+    }
+
+    async getSystemMode(): Promise<SystemMode> {
+        const response = await axios.get<SystemMode>('/ChargeSwitch/mode');
+        return response.data;
+    }
+
+    async setBatteryMode(mode: string): Promise<void> {
+        await axios.post('/ChargeSwitch/battery', null, {
+            params: { option: mode }
+        });
+    }
+
+    async setLoadMode(mode: string): Promise<void> {
+        await axios.post('/ChargeSwitch/load', null, {
+            params: { option: mode }
+        });
     }
 }
 

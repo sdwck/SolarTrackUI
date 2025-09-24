@@ -19,34 +19,31 @@ interface SystemUptimeChartProps {
     loading: boolean;
 }
 
-const generateMockUptimeData = () => {
-    const data = [];
-    const now = new Date();
-
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        const uptimeHours = 20 + Math.random() * 4;
-        const downtimeHours = 24 - uptimeHours;
-
-        data.push({
-            day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            uptime: Math.round(uptimeHours * 10) / 10,
-            downtime: Math.round(downtimeHours * 10) / 10,
-            uptimePercentage: Math.round((uptimeHours / 24) * 100 * 10) / 10
-        });
-    }
-
-    return data;
-};
-
 export const SystemUptimeChart = ({ data, loading }: SystemUptimeChartProps) => {
     const theme = useTheme();
-    const chartData = generateMockUptimeData();
 
-    const avgUptime = chartData.reduce((sum, d) => sum + d.uptimePercentage, 0) / chartData.length;
-    const totalUptime = chartData.reduce((sum, d) => sum + d.uptime, 0);
-    const totalHours = chartData.length * 24;
+    const chartData = data.reduce((acc, curr) => {
+        const date = new Date(curr.timestamp);
+        const day = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const existing = acc.find(d => d.day === day);
+        if (existing) {
+            if (curr.isSystemOn) {
+                existing.uptime += 1;
+                existing.downtime -= 1;
+            }
+        } else {
+            acc.push({
+                day,
+                date: day,
+                uptime: curr.isSystemOn ? 1 : 0,
+                downtime: curr.isSystemOn ? 23 : 24
+            });
+        }
+        return acc;
+    }, [] as Array<{ day: string; date: string; uptime: number; downtime: number }>);
+
+    const avgUptime = data.reduce((sum, d) => sum + (d.isSystemOn ? 1 : 0), 0) * 100 / (24 * 7);
+    const totalUptime = data.reduce((sum, d) => sum + (d.isSystemOn ? 1 : 0), 0);
 
     if (loading) {
         return (

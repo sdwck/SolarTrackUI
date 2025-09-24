@@ -13,6 +13,7 @@ import History from './pages/History';
 import NotFound from './pages/NotFound';
 import BatteryDetails from './pages/BatteryDetails';
 import SystemHealthDiagnostics from './pages/SystemHealthDiagnostics';
+import SystemControlPage from './pages/SystemControlPage';
 import MaintenanceManagement from './pages/Maintenance/MaintenanceManagement';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
@@ -39,13 +40,13 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 >
-
                   <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="history" element={<History />} />
                   <Route path="analytics" element={<Analytics />} />
                   <Route path="battery" element={<BatteryDetails />} />
                   <Route path="diagnostics" element={<SystemHealthDiagnostics />} />
+                  <Route path="control" element={<SystemControlPage />} />
                   <Route path="maintenance" element={<MaintenanceManagement />} />
                 </Route>
 

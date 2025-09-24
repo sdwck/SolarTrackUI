@@ -4,6 +4,5 @@ export interface HistoryData {
     batteryLevel: number;
     powerOutput: number;
     temperature: number;
-    efficiency: number;
     status: 'optimal' | 'good' | 'low';
 }

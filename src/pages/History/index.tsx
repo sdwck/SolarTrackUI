@@ -45,7 +45,6 @@ type HistoryRow = {
     batteryLevel: number;
     powerOutput: number;
     temperature: number;
-    efficiency: number;
     status: 'optimal' | 'good' | 'low';
 };
 
@@ -122,6 +121,7 @@ export default function History() {
             let data
             if (tabValue === 5 && from && to) data = await api.getHistoryData(timeRange, from, to);
             else data = await api.getHistoryData(timeRange);
+            data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
             setHistoryData(data);
             calculateSummaryStats(data);
         } catch (err: any) {
@@ -349,7 +349,6 @@ export default function History() {
                                             <TableCell align="right">Battery Level</TableCell>
                                             <TableCell align="right">Power Output</TableCell>
                                             <TableCell align="right">Temperature</TableCell>
-                                            <TableCell align="right">Efficiency</TableCell>
                                             <TableCell align="center">Status</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -380,7 +379,6 @@ export default function History() {
                                                         </Box>
                                                     </TableCell>
                                                     <TableCell align="right">{row.temperature}°C</TableCell>
-                                                    <TableCell align="right">{row.efficiency}%</TableCell>
                                                     <TableCell align="center">
                                                         <Chip label={row.status} color={getStatusColor(row.status)} size="small" sx={{ textTransform: 'capitalize' }} />
                                                     </TableCell>
@@ -476,9 +474,6 @@ export default function History() {
                                                     <Grid size={{ xs: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                                                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                                             {row.temperature}°C
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            {row.efficiency}%
                                                         </Typography>
                                                     </Grid>
                                                 </Grid>

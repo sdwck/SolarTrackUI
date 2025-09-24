@@ -23,6 +23,7 @@ import { MaintenanceCard } from '../../components/cards/MaintenanceCard';
 import { ThermalTrendChart } from '../../components/charts/ThermalTrendChart';
 import { VoltageStabilityChart } from '../../components/charts/VoltageStabilityChart';
 import { SystemUptimeChart } from '../../components/charts/SystemUptimeChart';
+import api from '../../services/api';
 
 interface HistoricalData {
     timestamp: string;
@@ -54,6 +55,27 @@ export default function SystemHealthDiagnostics() {
         const loadData = async () => {
             await fetchLatestData();
             setLastUpdate(new Date());
+
+            const data = await api.getSolarDataRange(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), new Date().toISOString(), 60);
+            if (!data) {
+                setHistoricalData([]);
+                return;
+            }
+
+            const mappedData = data
+                .filter(d => d.busVoltage !== 0)
+                .map(d => ({
+                    timestamp: d.timestamp,
+                    temperature: d.inverterHeatSinkTemperature,
+                    busVoltage: d.busVoltage,
+                    batteryVoltage: d.batteryData.batteryVoltage,
+                    isSystemOn: d.isSwitchedOn,
+                    acInputVoltage: d.powerData.acInputVoltage,
+                    acOutputVoltage: d.powerData.acOutputVoltage
+                }))
+                .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+            setHistoricalData(mappedData);
         };
         loadData();
     }, [fetchLatestData]);

@@ -263,12 +263,6 @@ export default function Analytics() {
                                         </Typography>
                                     </Box>
                                 </Box>
-
-                                <Box textAlign="center" py={2} sx={{ bgcolor: 'success.light', borderRadius: 2 }}>
-                                    <Typography variant="body2" fontWeight={600} color="gray.900">
-                                        +2.7 kWh surplus this week
-                                    </Typography>
-                                </Box>
                             </CardContent>
                         </Card>
                     </Grid>

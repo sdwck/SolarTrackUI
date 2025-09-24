@@ -55,20 +55,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { api } from '../../services/api';
 import type { MaintenanceTask, CreateMaintenanceTaskRequest, MaintenanceTaskStats } from '../../types';
 
-const mockTasks: MaintenanceTask[] = [
-    
-];
-
-const mockStats: MaintenanceTaskStats = {
-    total: 24,
-    pending: 6,
-    inProgress: 6,
-    completed: 6,
-    overdue: 6,
-    completionRate: 25
-};
-
-
 const CATEGORY_ICONS = {
     cleaning: <CleaningServices />,
     inspection: <Settings />,
@@ -182,14 +168,6 @@ export default function MaintenanceManagement() {
             setStats(statsData);
         } catch (error) {
             showSnackbar('Failed to load maintenance data', 'error');
-            const tasks = mockTasks.filter(task => !filter || filter === 'all' || task.status === filter);
-            setPaginationData(prev => ({
-                ...prev,
-                totalPages: Math.ceil(tasks.length / prev.pageSize),
-                totalItems: tasks.length
-            }));
-            setTasks(tasks.slice(paginationData.pageSize * (paginationData.currentPage - 1), paginationData.pageSize * paginationData.currentPage));
-            setStats(mockStats);
         } finally {
             setLoading(false);
         }
