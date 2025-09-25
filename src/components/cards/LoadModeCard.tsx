@@ -47,13 +47,13 @@ export function LoadModeCard({
         return (
             <Card sx={{ width: '100%' }}>
                 <CardContent sx={{ p: 3 }}>
-                    <Skeleton variant="text" width={150} height={32} sx={{ mb: 2 }} />
+                    <Skeleton variant="text" width={150} height={32} sx={{ mb: 1 }} />
                     <Box display="flex" flexDirection="column" gap={1}>
                         {[...Array(3)].map((_, i) => (
-                            <Skeleton key={i} variant="rounded" height={48} />
+                            <Skeleton key={i} variant="rounded" height={62} />
                         ))}
                     </Box>
-                    <Skeleton variant="rounded" width={100} height={36} sx={{ mt: 2 }} />
+                    <Skeleton variant="rounded" width={90} height={36} sx={{ mt: 11.2 }} />
                 </CardContent>
             </Card>
         );

@@ -1,304 +1,233 @@
+import React, { useMemo } from 'react';
 import {
     Card,
     CardContent,
     Typography,
     Box,
-    Chip,
-    Skeleton,
-    useTheme
+    Grid,
+    Avatar,
+    Fade,
+    Skeleton
 } from '@mui/material';
-import {
-    BatteryFull,
-    Home,
-    SolarPower,
-    ElectricBolt
-} from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
+import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
+import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import { type SolarData } from '../../types';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Battery50Icon from '@mui/icons-material/Battery50';
 
 export interface PowerFlowCardProps {
-    solarData?: SolarData | null;
+    data: SolarData | null;
     loading?: boolean;
 }
 
-type FlowDirection = 'charging' | 'discharging' | 'neutral';
+const GRID_PRESENCE_THRESHOLD = 200;
 
-export function PowerFlowCard({ solarData, loading = false }: PowerFlowCardProps) {
+const getBatteryColor = (cap: number, theme: any) => {
+    if (cap >= 80) return theme.palette.success.main;
+    if (cap >= 40) return theme.palette.warning.main;
+    return theme.palette.error.main;
+};
+
+export function PowerFlowCard({ data, loading = false }: PowerFlowCardProps) {
     const theme = useTheme();
 
-    const getFlowDirection = (): FlowDirection => {
-        if (!solarData?.batteryData) return 'neutral';
+    const computed = useMemo(() => {
+        if (!data) return {
+            acPresent: false,
+            pvActive: false,
+            batteryCharging: false,
+            batteryDischarging: false,
+            showSolarToInv: false,
+            showInvToLoad: false,
+            showInvToBatt: false,
+            showBattToInv: false,
+        };
 
-        const { batteryChargingCurrent, batteryDischargeCurrent } = solarData.batteryData;
+        const acPresent = data.powerData?.acInputVoltage > GRID_PRESENCE_THRESHOLD;
+        const pvActive = data.powerData?.pvInputPower > 0;
+        const batteryCharging = data.batteryData?.batteryChargingCurrent > 0 && data.batteryData.batteryChargingCurrent > data.batteryData?.batteryDischargeCurrent;
+        const batteryDischarging = data.batteryData?.batteryDischargeCurrent > 0 && data.batteryData.batteryDischargeCurrent > data.batteryData?.batteryChargingCurrent;
 
-        if (batteryChargingCurrent > 0) return 'charging';
-        if (batteryDischargeCurrent > 0) return 'discharging';
-        return 'neutral';
+        const sourceAvailable = pvActive || acPresent || batteryDischarging;
+
+        return {
+            acPresent,
+            pvActive,
+            batteryCharging,
+            batteryDischarging,
+            showSolarToInv: pvActive,
+            showInvToLoad: data.isLoadOn && sourceAvailable,
+            showInvToBatt: batteryCharging,
+            showBattToInv: batteryDischarging,
+        };
+    }, [data]);
+
+    const pvPower = data?.powerData?.pvInputPower ?? 0;
+    const acVoltage = data?.powerData?.acInputVoltage ?? 0;
+    const battV = data?.batteryData?.batteryVoltage ?? 0;
+    const battChargingCurrent = data?.batteryData?.batteryChargingCurrent ?? 0;
+
+    const uid = React.useMemo(() => Math.random().toString(36).slice(2, 9), []);
+
+    const isXsUp = useMediaQuery(theme.breakpoints.up('sm'));
+    const W = isXsUp ? 560 : 360;
+    const H = 220;
+    const positions = {
+        solar: { x: 80, y: H / 4 },
+        inverter: { x: W / 2, y: H / 4 },
+        load: { x: W - 80, y: H / 4 },
+        battery: { x: W / 2, y: H / 4 * 3 },
     };
 
-    const flowDirection = getFlowDirection();
-    const isPvActive = (solarData?.powerData?.pvInputPower ?? 0) > 0;
-    const isLoadActive = solarData?.isLoadOn ?? false;
-    const isAcCharging = solarData?.isAcChargingOn ?? false;
-
-    if (loading) {
+    if (loading || !data) {
         return (
-            <Card className="h-96">
-                <CardContent className="p-6">
-                    <Skeleton variant="text" width={200} height={32} className="mb-6" />
-                    <div className="flex justify-center items-center h-80">
-                        <Skeleton variant="rounded" width="100%" height="100%" />
-                    </div>
-                </CardContent>
-            </Card>
+            <Fade in timeout={600}>
+                <Card>
+                    <CardContent sx={{ p: 3 }}>
+                        <Box display="flex" justifyContent="space-between" mb={2}>
+                            <Typography variant="h6" fontWeight={600}>
+                                Power Flow
+                            </Typography>
+                            <Skeleton variant="circular" width={48} height={48} />
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid size={{ xs: 12 }}>
+                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                    Flow Diagram
+                                </Typography>
+                                <Box mt={1}>
+                                    <Skeleton variant="rounded" height={140} sx={{ borderRadius: 2 }} />
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+            </Fade>
         );
     }
 
-    const AnimatedArrow = ({ direction, color, active }: { direction: string, color: string, active: boolean }) => {
-        if (!active) return null;
-
-        const arrowClasses = `absolute w-4 h-4 ${active ? 'animate-pulse' : 'opacity-30'}`;
-        const borderColor = color;
-
-        switch (direction) {
-            case 'down':
-                return (
-                    <div className={`${arrowClasses} border-l-2 border-r-2 border-t-4`}
-                        style={{
-                            borderTopColor: borderColor,
-                            borderLeftColor: 'transparent',
-                            borderRightColor: 'transparent'
-                        }}
-                    />
-                );
-            case 'up':
-                return (
-                    <div className={`${arrowClasses} border-l-2 border-r-2 border-b-4`}
-                        style={{
-                            borderBottomColor: borderColor,
-                            borderLeftColor: 'transparent',
-                            borderRightColor: 'transparent'
-                        }}
-                    />
-                );
-            case 'right':
-                return (
-                    <div className={`${arrowClasses} border-t-2 border-b-2 border-l-4`}
-                        style={{
-                            borderLeftColor: borderColor,
-                            borderTopColor: 'transparent',
-                            borderBottomColor: 'transparent'
-                        }}
-                    />
-                );
-            case 'left':
-                return (
-                    <div className={`${arrowClasses} border-t-2 border-b-2 border-r-4`}
-                        style={{
-                            borderRightColor: borderColor,
-                            borderTopColor: 'transparent',
-                            borderBottomColor: 'transparent'
-                        }}
-                    />
-                );
-            default:
-                return null;
-        }
-    };
-
-    const FlowLine = ({ direction, color, active }: { direction: string, color: string, active: boolean }) => {
-        if (!active) return null;
-
-        const lineClasses = `absolute bg-gradient-to-r ${active ? 'animate-pulse' : 'opacity-30'}`;
-
-        switch (direction) {
-            case 'vertical':
-                return <div className={`${lineClasses} w-1 h-16`} style={{ backgroundColor: color }} />;
-            case 'horizontal':
-                return <div className={`${lineClasses} h-1 w-16`} style={{ backgroundColor: color }} />;
-            default:
-                return null;
-        }
-    };
-
     return (
-        <Card className="h-96">
-            <CardContent className="p-6">
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Energy Flow - Classic Inverter View
-                </Typography>
+        <Card>
+            <CardContent sx={{ p: 3 }}>
+                <Box display="flex" justifyContent="space-between" mb={2}>
+                    <Typography variant="h6" fontWeight={600}>Power Flow</Typography>
+                    <Avatar
+                        sx={{
+                            bgcolor: getBatteryColor(data.batteryData.batteryCapacity, theme),
+                            width: 48,
+                            height: 48,
+                            boxShadow: `0 6px 18px ${getBatteryColor(data.batteryData.batteryCapacity, theme)}33`,
+                        }}
+                        aria-label={battChargingCurrent && battChargingCurrent > 0 ? 'charging' : 'battery'}
+                    >
+                        {battChargingCurrent && battChargingCurrent > 0 ? <BatteryChargingFullIcon /> : <BatteryFullIcon />}
+                    </Avatar>
+                </Box>
 
-                <div className="relative h-80 flex flex-col justify-between items-center">
-                    <div className="flex justify-between items-center w-full">
-                        <div className="flex flex-col items-center relative">
-                            <div
-                                className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 transition-all duration-300 ${isPvActive
-                                        ? 'bg-orange-100 border-orange-400 shadow-orange-200'
-                                        : 'bg-gray-100 border-gray-300'
-                                    }`}
-                            >
-                                <SolarPower
-                                    className={`text-3xl ${isPvActive ? 'text-orange-600' : 'text-gray-400'}`}
-                                />
-                            </div>
-                            <div className="mt-2 text-center">
-                                <Typography variant="body2" fontWeight={600}>
-                                    Solar
-                                </Typography>
-                                <Typography
-                                    variant="body1"
-                                    fontWeight={700}
-                                    className={isPvActive ? 'text-orange-600' : 'text-gray-400'}
+                <Grid container spacing={3}>
+                    <Grid size={{ xs: 12 }}>
+                        <Box sx={{ position: 'relative', borderRadius: 1, bgcolor: 'background.paper', p: 2, border: '1px solid', borderColor: 'divider' }}>
+                            <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
+                                <style>{`.flow-${uid} { stroke-dasharray: 10 6; animation: dash-${uid} 0.9s linear infinite; } @keyframes dash-${uid} { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -16; } }`}</style>
+                                <defs>
+                                    <marker id={`m-solar-${uid}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill={theme.palette.warning.main} />
+                                    </marker>
+                                    <marker id={`m-inv-${uid}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill={theme.palette.primary.main} />
+                                    </marker>
+                                    <marker id={`m-grid-${uid}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill={theme.palette.info.main} />
+                                    </marker>
+                                    <marker id={`m-batt-${uid}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill={theme.palette.success.main} />
+                                    </marker>
+                                </defs>
+
+                                {computed.showSolarToInv && (
+                                    <>
+                                        <g transform={`translate(${positions.solar.x - 18}, ${positions.solar.y - 18})`}>
+                                            <circle cx={18} cy={18} r={18} fill="#FEF3C7" stroke="#F59E0B" strokeWidth={1} />
+                                        </g>
+                                        <text x={positions.solar.x} y={positions.solar.y + 36} textAnchor="middle" fontSize={11} fill={theme.palette.text.primary}>Solar</text>
+                                    </>
+                                )}
+
+                                <g transform={`translate(${positions.inverter.x - 26}, ${positions.inverter.y - 22})`}>
+                                    <rect x={0} y={0} width={52} height={44} rx={8} fill="#F8FAFC" stroke="#CBD5E1" />
+                                </g>
+
+                                <g transform={`translate(${positions.load.x - 18}, ${positions.load.y - 18})`}>
+                                    <circle cx={18} cy={18} r={18} fill="#EFF6FF" stroke="#93C5FD" strokeWidth={1} />
+                                </g>
+                                <text x={positions.load.x} y={positions.load.y + 36} textAnchor="middle" fontSize={11} fill={theme.palette.text.primary}>Load</text>
+
+                                {(computed.showInvToBatt || computed.showBattToInv) && (
+                                    <>
+                                        <g transform={`translate(${positions.battery.x - 18}, ${positions.battery.y - 18})`}>
+                                            <circle cx={18} cy={18} r={18} fill="#ECFDF5" stroke="#34D399" strokeWidth={1} />
+                                        </g>
+                                        <text x={positions.battery.x} y={positions.battery.y + 36} textAnchor="middle" fontSize={11} fill={theme.palette.text.primary}>Battery</text>
+                                    </>
+                                )}
+
+                                {computed.showSolarToInv && (
+                                    <line x1={positions.solar.x + 18} y1={positions.solar.y} x2={positions.inverter.x - 26} y2={positions.inverter.y} stroke={theme.palette.warning.main} strokeWidth={3} strokeLinecap="round" markerEnd={`url(#m-solar-${uid})`} className={`flow-${uid}`} />
+                                )}
+                                {computed.showInvToLoad && (
+                                    <line x1={positions.inverter.x + 26} y1={positions.inverter.y} x2={positions.load.x - 18} y2={positions.load.y} stroke={theme.palette.primary.main} strokeWidth={3} strokeLinecap="round" markerEnd={`url(#m-inv-${uid})`} className={`flow-${uid}`} />
+                                )}
+                                {computed.showBattToInv && (
+                                    <line x1={positions.battery.x} y1={positions.battery.y - 18} x2={positions.inverter.x} y2={positions.inverter.y + 22} stroke={theme.palette.success.main} strokeWidth={2.5} strokeLinecap="round" markerEnd={`url(#m-batt-${uid})`} className={`flow-${uid}`} />
+                                )}
+                                {computed.showInvToBatt && (
+                                    <line x1={positions.inverter.x} y1={positions.inverter.y + 22} x2={positions.battery.x} y2={positions.battery.y - 18} stroke={theme.palette.success.main} strokeWidth={2.5} strokeLinecap="round" markerEnd={`url(#m-batt-${uid})`} className={`flow-${uid}`} />
+                                )}
+
+                                <text
+                                    x={positions.inverter.x}
+                                    y={positions.inverter.y - 32}
+                                    textAnchor="middle"
+                                    fontSize={11}
+                                    fill={theme.palette.text.primary}
                                 >
-                                    {solarData?.powerData?.pvInputPower ?? 0}W
-                                </Typography>
-                            </div>
+                                    Inverter
+                                </text>
+                            </svg>
 
-                            {isPvActive && (
-                                <div className="absolute top-24 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-                                    <FlowLine direction="vertical" color={theme.palette.warning.main} active={isPvActive} />
-                                    <AnimatedArrow direction="down" color={theme.palette.warning.main} active={isPvActive} />
-                                </div>
-                            )}
-                        </div>
+                            <Box sx={{ position: 'absolute', left: 16, top: 16, fontSize: 12, color: 'text.secondary' }}>
+                                <div>PV: <strong>{pvPower.toFixed(0)} W</strong></div>
+                                <div>AC: <strong>{acVoltage} V</strong></div>
+                            </Box>
 
-                        <div className="flex flex-col items-center relative">
-                            <div
-                                className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 bg-blue-100 border-blue-400 shadow-blue-200"
-                            >
-                                <ElectricBolt className="text-3xl text-blue-600" />
-                            </div>
-                            <div className="mt-2 text-center">
-                                <Typography variant="body2" fontWeight={600}>
-                                    AC Input
-                                </Typography>
-                                <Typography variant="body1" fontWeight={700} className="text-blue-600">
-                                    {solarData?.powerData?.acInputVoltage ?? 0}V
-                                </Typography>
-                            </div>
+                            <Box sx={{ position: 'absolute', right: 16, top: 16, fontSize: 12, color: 'text.secondary', textAlign: 'right' }}>
+                                <div>Bat: <strong>{battV.toFixed(2)} V</strong></div>
+                                <div>Chg: <strong>+{battChargingCurrent.toFixed(1)} A</strong></div>
+                            </Box>
 
-                            {isAcCharging && (
-                                <div className="absolute top-24 right-1/2 transform translate-x-1/2 flex flex-col items-center">
-                                    <FlowLine direction="vertical" color={theme.palette.info.main} active={isAcCharging} />
-                                    <AnimatedArrow direction="down" color={theme.palette.info.main} active={isAcCharging} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                            <Box sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 8, fontSize: 12, color: 'text.secondary' }}>
+                                {computed.batteryCharging ? (
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <BatteryChargingFullIcon sx={{ color: 'success.main' }} fontSize="small" />
+                                        <Typography variant="caption">Battery charging</Typography>
+                                    </Box>
+                                ) : computed.batteryDischarging ? (
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <Battery50Icon sx={{ color: 'success.main' }} fontSize="small" />
+                                        <Typography variant="caption" sx={{ color: 'error.main' }}>Battery discharging</Typography>
+                                    </Box>
+                                ) : (
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <BatteryFullIcon sx={{ color: 'text.secondary' }} fontSize="small" />
+                                        <Typography variant="caption" color="text.secondary">Battery idle</Typography>
+                                    </Box>
+                                )}
+                            </Box>
 
-                    <div className="flex flex-col items-center relative">
-                        <div
-                            className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl border-4 transition-all duration-300 ${flowDirection === 'charging'
-                                    ? 'bg-green-100 border-green-500 shadow-green-200'
-                                    : flowDirection === 'discharging'
-                                        ? 'bg-red-100 border-red-500 shadow-red-200'
-                                        : 'bg-gray-100 border-gray-400'
-                                }`}
-                        >
-                            <BatteryFull
-                                className={`text-4xl ${flowDirection === 'charging' ? 'text-green-600' :
-                                        flowDirection === 'discharging' ? 'text-red-600' :
-                                            'text-gray-400'
-                                    }`}
-                            />
-                        </div>
-                        <div className="mt-2 text-center">
-                            <Typography variant="body2" fontWeight={600}>
-                                Battery
-                            </Typography>
-                            <Typography
-                                variant="h5"
-                                fontWeight={700}
-                                className={
-                                    flowDirection === 'charging' ? 'text-green-600' :
-                                        flowDirection === 'discharging' ? 'text-red-600' :
-                                            'text-gray-400'
-                                }
-                            >
-                                {solarData?.batteryData?.batteryCapacity ?? 0}%
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                {solarData?.batteryData?.batteryVoltage ?? 0}V
-                            </Typography>
-                        </div>
-
-                        {flowDirection === 'charging' && (
-                            <div className="absolute -top-3 -right-3 bg-green-500 rounded-full p-1 animate-bounce">
-                                <div className="w-3 h-3 bg-white rounded-full" />
-                            </div>
-                        )}
-                        {flowDirection === 'discharging' && (
-                            <div className="absolute -top-3 -right-3 bg-red-500 rounded-full p-1 animate-bounce">
-                                <div className="w-3 h-3 bg-white rounded-full" />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex flex-col items-center relative">
-                        <div
-                            className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 transition-all duration-300 ${isLoadActive
-                                    ? 'bg-purple-100 border-purple-400 shadow-purple-200'
-                                    : 'bg-gray-100 border-gray-300'
-                                }`}
-                        >
-                            <Home
-                                className={`text-3xl ${isLoadActive ? 'text-purple-600' : 'text-gray-400'}`}
-                            />
-                        </div>
-                        <div className="mt-2 text-center">
-                            <Typography variant="body2" fontWeight={600}>
-                                Load
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                fontWeight={700}
-                                className={isLoadActive ? 'text-purple-600' : 'text-gray-400'}
-                            >
-                                {solarData?.powerData?.acOutputActivePower ?? 0}W
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                {solarData?.powerData?.acOutputLoad ?? 0}%
-                            </Typography>
-                        </div>
-
-                        {flowDirection === 'discharging' && isLoadActive && (
-                            <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-                                <AnimatedArrow direction="down" color={theme.palette.error.main} active={true} />
-                                <FlowLine direction="vertical" color={theme.palette.error.main} active={true} />
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="mt-4 flex justify-center gap-2 flex-wrap">
-                    <Chip
-                        size="small"
-                        label={
-                            flowDirection === 'charging' ? 'Charging Battery' :
-                                flowDirection === 'discharging' ? 'Battery → Load' :
-                                    'System Idle'
-                        }
-                        color={
-                            flowDirection === 'charging' ? 'success' :
-                                flowDirection === 'discharging' ? 'error' :
-                                    'default'
-                        }
-                        className="font-semibold"
-                    />
-                    {isPvActive && (
-                        <Chip
-                            size="small"
-                            label="Solar Active"
-                            className="bg-orange-100 text-orange-800 font-semibold"
-                        />
-                    )}
-                    {isLoadActive && (
-                        <Chip
-                            size="small"
-                            label="Load Active"
-                            className="bg-purple-100 text-purple-800 font-semibold"
-                        />
-                    )}
-                </div>
+                        </Box>
+                    </Grid>
+                </Grid>
             </CardContent>
         </Card>
     );

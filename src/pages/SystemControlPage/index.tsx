@@ -49,8 +49,8 @@ export default function SystemControlPage() {
 
     const [systemMode, setSystemMode] = useState<SystemMode>({
         id: 1,
-        batteryMode: 'PCP02',
-        loadMode: 'POP02'
+        batteryMode: 'PCP00',
+        loadMode: 'POP00'
     });
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -87,15 +87,6 @@ export default function SystemControlPage() {
         }
     };
 
-    const refreshSolarData = async (): Promise<void> => {
-        try {
-            await fetchLatestData();
-            setLastUpdate(new Date());
-        } catch (error) {
-            console.error('Error refreshing solar data:', error);
-        }
-    };
-
     const handleRefresh = async (): Promise<void> => {
         setRefreshing(true);
         clearError();
@@ -127,10 +118,6 @@ export default function SystemControlPage() {
             console.error('Error changing load mode:', error);
             showSnackbar('Error changing load mode', 'error');
         }
-    };
-
-    const handleDataChange = (): void => {
-        refreshSolarData();
     };
 
     const showSnackbar = (message: string, severity: SnackbarSeverity): void => {
@@ -191,7 +178,7 @@ export default function SystemControlPage() {
                     <Grid size={12}>
                         <Fade in timeout={600}>
                             <div>
-                                <PowerFlowCard solarData={solarData} loading={loading} />
+                                <PowerFlowCard data={solarData} loading={loading} />
                             </div>
                         </Fade>
                     </Grid>
