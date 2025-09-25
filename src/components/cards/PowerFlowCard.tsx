@@ -36,6 +36,7 @@ export function PowerFlowCard({ data, loading = false }: PowerFlowCardProps) {
         if (!data) return {
             acPresent: false,
             pvActive: false,
+            batteryDiff: 0,
             batteryCharging: false,
             batteryDischarging: false,
             showSolarToInv: false,
@@ -46,14 +47,16 @@ export function PowerFlowCard({ data, loading = false }: PowerFlowCardProps) {
 
         const acPresent = data.powerData?.acInputVoltage > GRID_PRESENCE_THRESHOLD;
         const pvActive = data.powerData?.pvInputPower > 0;
-        const batteryCharging = data.batteryData?.batteryChargingCurrent > 0 && data.batteryData.batteryChargingCurrent > data.batteryData?.batteryDischargeCurrent;
-        const batteryDischarging = data.batteryData?.batteryDischargeCurrent > 0 && data.batteryData.batteryDischargeCurrent > data.batteryData?.batteryChargingCurrent;
+        const batteryDiff = (data.batteryData?.batteryChargingCurrent ?? 0) - (data.batteryData?.batteryDischargeCurrent ?? 0);
+        const batteryCharging = batteryDiff > 0;
+        const batteryDischarging = batteryDiff < 0;
 
         const sourceAvailable = pvActive || acPresent || batteryDischarging;
 
         return {
             acPresent,
             pvActive,
+            batteryDiff,
             batteryCharging,
             batteryDischarging,
             showSolarToInv: pvActive,
@@ -85,7 +88,7 @@ export function PowerFlowCard({ data, loading = false }: PowerFlowCardProps) {
             <Fade in timeout={600}>
                 <Card>
                     <CardContent sx={{ p: 3 }}>
-                        <Box display="flex" justifyContent="space-between" mb={2}>
+                        <Box display="flex" justifyContent="space-between" mb={1}>
                             <Typography variant="h6" fontWeight={600}>
                                 Power Flow
                             </Typography>
@@ -93,11 +96,8 @@ export function PowerFlowCard({ data, loading = false }: PowerFlowCardProps) {
                         </Box>
                         <Grid container spacing={3}>
                             <Grid size={{ xs: 12 }}>
-                                <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    Flow Diagram
-                                </Typography>
                                 <Box mt={1}>
-                                    <Skeleton variant="rounded" height={140} sx={{ borderRadius: 2 }} />
+                                    <Skeleton variant="rounded" height={254} sx={{ borderRadius: 2 }} />
                                 </Box>
                             </Grid>
                         </Grid>
@@ -203,7 +203,7 @@ export function PowerFlowCard({ data, loading = false }: PowerFlowCardProps) {
 
                             <Box sx={{ position: 'absolute', right: 16, top: 16, fontSize: 12, color: 'text.secondary', textAlign: 'right' }}>
                                 <div>Bat: <strong>{battV.toFixed(2)} V</strong></div>
-                                <div>Chg: <strong>+{battChargingCurrent.toFixed(1)} A</strong></div>
+                                <div>Chg: <strong>{computed.batteryDiff > 0 ? '+' : ''}{computed.batteryDiff.toFixed(1)} A</strong></div>
                             </Box>
 
                             <Box sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 8, fontSize: 12, color: 'text.secondary' }}>
