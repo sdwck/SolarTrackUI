@@ -6,13 +6,10 @@ import {
     Avatar,
     Skeleton,
     LinearProgress,
-    Chip,
-    Grid
+    Chip
 } from '@mui/material';
 import { 
     ElectricBolt,
-    TrendingUp,
-    TrendingDown,
     TrendingFlat,
     Warning
 } from '@mui/icons-material';

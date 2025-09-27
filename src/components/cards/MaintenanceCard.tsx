@@ -17,14 +17,12 @@ import {
 import {
     Build,
     Schedule,
-    Warning,
     CalendarMonth,
     CleaningServices,
     Settings,
     Engineering,
     Upgrade,
-    Tune,
-    ArrowForward
+    Tune
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
@@ -63,7 +61,7 @@ const getPriorityColor = (priority: string) => {
     }
 };
 
-export const MaintenanceCard = ({ solarData, loading }: MaintenanceCardProps) => {
+export const MaintenanceCard = ({ loading }: MaintenanceCardProps) => {
     const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
     const [stats, setStats] = useState<MaintenanceTaskStats | null>(null);
     const [cardLoading, setCardLoading] = useState(true);

@@ -155,16 +155,6 @@ const getAlertIcon = (type: Alert['type']) => {
     }
 };
 
-const getAlertColor = (type: Alert['type']) => {
-    switch (type) {
-        case 'error': return 'error.main';
-        case 'warning': return 'warning.main';
-        case 'info': return 'info.main';
-        case 'success': return 'success.main';
-        default: return 'grey.500';
-    }
-};
-
 const getPriorityChip = (priority: Alert['priority']) => {
     const colors = {
         high: 'error' as const,
