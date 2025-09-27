@@ -39,26 +39,21 @@ export const useSolarStore = create<SolarState>()(
 
             fetchLatestData: async () => {
                 try {
-                    set({ loading: true, error: null });
                     const data = await api.getLatestSolarData();
-                    set({ latestData: data, loading: false });
+                    set({ latestData: data });
                 } catch (error) {
-                    const apiError = error as ApiError;
-                    set({ error: apiError, loading: false });
+                    set({ error: error as ApiError });
                 }
             },
 
             fetchPredictions: async () => {
                 try {
-                    set({ loading: true, error: null });
-                    const todayData = await api.getPredictionData('today');
                     const tomorrowData = await api.getPredictionData('tomorrow');
                     const weekData = await api.getPredictionData('week');
                     const monthData = await api.getPredictionData('month');
-                    set({ predictions: [todayData, tomorrowData, weekData, monthData], loading: false });
+                    set({ predictions: [tomorrowData, weekData, monthData] });
                 } catch (error) {
-                    const apiError = error as ApiError;
-                    set({ error: apiError, loading: false });
+                    set({ error: error as ApiError });
                 }
             },
 

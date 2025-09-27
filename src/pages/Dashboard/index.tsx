@@ -13,7 +13,6 @@ export default function Dashboard() {
     const {
         latestData,
         predictions,
-        loading,
         error,
         fetchLatestData,
         fetchSystemMetrics,
@@ -37,11 +36,27 @@ export default function Dashboard() {
         return () => clearInterval(interval);
     }, [fetchLatestData, fetchSystemMetrics, fetchPredictions]);
 
-    const handleRefresh = async (): Promise<void> => {
+    const [refreshing, setRefreshing] = useState(false);
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
         clearError();
-        await Promise.all([fetchLatestData(), fetchSystemMetrics(), fetchPredictions()]);
+        await Promise.all([
+            fetchLatestData(),
+            fetchSystemMetrics(),
+            fetchPredictions()
+        ]);
         setLastUpdate(new Date());
+        setRefreshing(false);
     };
+
+    const [_, setTick] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => setTick(t => t + 1), 1000);
+        return () => clearInterval(interval);
+    }, []);
+
 
     const formatLastUpdate = (date: Date | null): string => {
         if (!date) return '';
@@ -73,7 +88,7 @@ export default function Dashboard() {
                             {lastUpdate ? `Last updated: ${formatLastUpdate(lastUpdate)}` : 'Loading system data...'}
                         </Typography>
                     </Box>
-                    <Button variant="outlined" startIcon={<Refresh />} onClick={handleRefresh} disabled={loading} size="large" sx={{ minWidth: 120, borderRadius: 2 }}>
+                    <Button variant="outlined" startIcon={<Refresh />} onClick={handleRefresh} disabled={refreshing} size="large" sx={{ minWidth: 120, borderRadius: 2 }}>
                         Refresh
                     </Button>
                 </Box>

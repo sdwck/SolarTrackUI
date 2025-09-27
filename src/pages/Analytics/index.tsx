@@ -223,7 +223,7 @@ export default function Analytics() {
                         <Card sx={{ height: '100%' }}>
                             <CardContent sx={{ p: 3 }}>
                                 <Typography variant="h6" fontWeight={600} gutterBottom>
-                                    Weekly Performance
+                                    Performance
                                 </Typography>
 
                                 <Box mb={3}>
