@@ -30,10 +30,9 @@ import {
     ElectricBolt,
     PowerSettingsNew,
 } from '@mui/icons-material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import api from '../../services/api';
-import { type BatteryData, type SolarData, type PowerData } from '../../types';
-import type { NameType } from 'recharts/types/component/DefaultTooltipContent';
+import { type BatteryData, type SolarData } from '../../types';
 
 interface BatteryStatsCardProps {
     title: string;
@@ -182,7 +181,7 @@ const BatteryVoltageChart = ({ data, loading }: { data: BatteryChartData[]; load
                                 fontSize={12}
                                 tickFormatter={(value) => {
                                     const date = new Date(value);
-                                    const formattedDate = date.toLocaleTimeString([], {
+                                    const formattedDate = date.toLocaleTimeString('en-US', {
                                         month: showDays ? 'short' : undefined,
                                         day: showDays ? 'numeric' : undefined,
                                         hour: '2-digit',
@@ -255,7 +254,7 @@ const BatteryCapacityChart = ({ data, loading }: { data: BatteryChartData[]; loa
                                 fontSize={12}
                                 tickFormatter={(value) => {
                                     const date = new Date(value);
-                                    const formattedDate = date.toLocaleTimeString([], {
+                                    const formattedDate = date.toLocaleTimeString('en-US', {
                                         month: showDays ? 'short' : undefined,
                                         day: showDays ? 'numeric' : undefined,
                                         hour: '2-digit',
@@ -349,7 +348,7 @@ const CurrentFlowChart = ({ data, loading }: { data: BatteryChartData[]; loading
                                 fontSize={12}
                                 tickFormatter={(value) => {
                                     const date = new Date(value);
-                                    const formattedDate = date.toLocaleTimeString([], {
+                                    const formattedDate = date.toLocaleTimeString('en-US', {
                                         month: showDays ? 'short' : undefined,
                                         day: showDays ? 'numeric' : undefined,
                                         hour: '2-digit',
