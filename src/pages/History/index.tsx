@@ -74,7 +74,7 @@ const TrendIcon = ({ current, previous }: { current: number; previous?: number }
 };
 
 export default function History() {
-    const [tabValue, setTabValue] = useState<number>(0);
+    const [tabValue, setTabValue] = useState<number>(5);
     const theme = useTheme();
     const [historyData, setHistoryData] = useState<HistoryData[]>([]);
     const [summaryStats, setSummaryStats] = useState({
@@ -85,8 +85,8 @@ export default function History() {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [from, setFrom] = useState<string>('');
-    const [to, setTo] = useState<string>('');
+    const [from, setFrom] = useState<string>('2026-01-31T02:51:36.8381549');
+    const [to, setTo] = useState<string>('2026-01-31T08:51:36.8381549');
 
     const calculateSummaryStats = (data: HistoryData[]) => {
         if (data.length === 0) return;
@@ -149,7 +149,7 @@ export default function History() {
                 default: timeRange = 'today';
             }
 
-            const data = await api.getHistoryData(timeRange);
+            const data = await api.getHistoryData(timeRange, from, to);
             setHistoryData(data);
             calculateSummaryStats(data);
         } catch (err: any) {
@@ -312,6 +312,9 @@ export default function History() {
                         </Button>
                     </Box>
                 }
+                <Typography variant="body2" color="text.secondary" sx={{ alignSelf: 'center', mx: 2, my: 2 }}>
+                    (tabs disabled in demo)
+                </Typography>
                 <Card sx={{ borderColor: 'divider', width: { xs: '96vw', sm: '100%' } }}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Tabs
@@ -321,10 +324,10 @@ export default function History() {
                             scrollButtons="auto"
                             sx={{ px: 2 }}
                         >
-                            <Tab label="Today" />
-                            <Tab label="3 Days" />
-                            <Tab label="Week" />
-                            <Tab label="Month" />
+                            <Tab disabled label="Today" />
+                            <Tab disabled label="3 Days" />
+                            <Tab disabled label="Week" />
+                            <Tab disabled label="Month" />
                             <Box sx={{ flex: 1 }} />
                             <Tab
                                 icon={

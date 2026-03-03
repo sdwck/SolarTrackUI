@@ -125,7 +125,7 @@ export default function MaintenanceManagement() {
             setEditDialogOpen(false);
             setEditingTask(null);
             await loadData();
-            showSnackbar('Task updated successfully', 'success');
+            showSnackbar('Task updated successfully (demo - nothing happened)', 'success');
         } catch (error) {
             showSnackbar('Failed to update task', 'error');
         }
@@ -213,7 +213,7 @@ export default function MaintenanceManagement() {
                 tags: []
             });
             await loadData();
-            showSnackbar('Task created successfully', 'success');
+            showSnackbar('Task created successfully (demo - nothing happened)', 'success');
         } catch (error) {
             showSnackbar('Failed to create task', 'error');
         }
@@ -223,7 +223,7 @@ export default function MaintenanceManagement() {
         try {
             await api.completeMaintenanceTask(id);
             await loadData();
-            showSnackbar('Task completed successfully', 'success');
+            showSnackbar('Task completed successfully (demo - nothing happened)', 'success');
         } catch (error) {
             showSnackbar('Failed to complete task', 'error');
         }
@@ -233,7 +233,7 @@ export default function MaintenanceManagement() {
         try {
             await api.deleteMaintenanceTask(id);
             await loadData();
-            showSnackbar('Task deleted successfully', 'success');
+            showSnackbar('Task deleted successfully (demo - nothing happened)', 'success');
         } catch (error) {
             showSnackbar('Failed to delete task', 'error');
         }

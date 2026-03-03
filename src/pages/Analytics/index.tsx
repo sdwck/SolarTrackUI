@@ -48,7 +48,7 @@ const getImpactIcon = (impact: string) => {
 };
 
 export default function Analytics() {
-    const [timeRange, setTimeRange] = useState('week');
+    const [timeRange, setTimeRange] = useState('year');
 
     const emptyAnalyticsData: AnalyticsData = {
         dailyAverage: {

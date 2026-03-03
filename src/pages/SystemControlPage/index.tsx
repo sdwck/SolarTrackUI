@@ -103,7 +103,7 @@ export default function SystemControlPage() {
     const handleBatteryModeChange = async (newMode: string): Promise<void> => {
         try {
             await api.setBatteryMode(newMode);
-            showSnackbar(`Request sent to change battery mode to ${newMode}`, 'info');
+            showSnackbar(`Request sent to change battery mode to ${newMode} (demo - nothing happened)`, 'info');
         } catch (error) {
             console.error('Error changing battery mode:', error);
             showSnackbar('Error changing battery mode', 'error');
@@ -113,7 +113,7 @@ export default function SystemControlPage() {
     const handleLoadModeChange = async (newMode: string): Promise<void> => {
         try {
             await api.setLoadMode(newMode);
-            showSnackbar(`Request sent to change load mode to ${newMode}`, 'success');
+            showSnackbar(`Request sent to change load mode to ${newMode} (demo - nothing happened)`, 'info');
         } catch (error) {
             console.error('Error changing load mode:', error);
             showSnackbar('Error changing load mode', 'error');

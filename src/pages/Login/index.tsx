@@ -94,8 +94,15 @@ export const LoginPage: React.FC = () => {
                             <Typography variant="body1" color="text.secondary" textAlign="center">
                                 Sign in to access your solar energy management system
                             </Typography>
-                            <Typography variant="caption" color="text.disabled" sx={{ mt: 1 }}>
+                            {/* <Typography variant="caption" color="text.disabled" sx={{ mt: 1 }}>
                                 Access restricted to authorized personnel only
+                            </Typography> */}
+
+                            <Typography variant="caption" color="text.disabled" sx={{ mt: 1 }}>
+                                To access demo mode, use
+                            </Typography>
+                            <Typography variant="caption" color="text.disabled">
+                                Username: <strong>admin</strong> | Password: <strong>admin</strong>
                             </Typography>
                         </Box>
 

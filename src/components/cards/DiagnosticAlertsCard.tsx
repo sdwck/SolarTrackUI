@@ -40,7 +40,7 @@ const generateAlerts = (data: SolarData | null): Alert[] => {
     if (!data) return [];
 
     const alerts: Alert[] = [];
-    const now = new Date();
+    const now = new Date("2026-01-31T08:51:36.8381549");
 
     if (data.inverterHeatSinkTemperature > 70) {
         alerts.push({

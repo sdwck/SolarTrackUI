@@ -23,7 +23,7 @@ export const ThermalTrendChart = ({ data, loading }: ThermalTrendChartProps) => 
     const todaysData = data
         .filter(d => {
             const date = new Date(d.timestamp);
-            return date >= new Date(Date.now() - 24 * 60 * 60 * 1000);
+            return date >= new Date("2026-01-30T08:51:36.8381549");
         })
         .map(d => ({
             ...d,

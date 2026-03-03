@@ -627,7 +627,7 @@ export default function BatteryDetails() {
     }
 
     const [customRange, setCustomRange] = useState<{ from: string; to: string }>(() => {
-        const end = new Date();
+        const end = new Date("2026-01-31T08:51:36.8381549");
         const start = new Date(end);
         start.setHours(end.getHours() - 1);
         return { from: toLocalDateTimeInput(start), to: toLocalDateTimeInput(end) };
@@ -637,7 +637,7 @@ export default function BatteryDetails() {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const applyPresetRange = (hours: number) => {
-        const end = new Date();
+        const end = new Date("2026-01-31T08:51:36.8381549");
         const start = new Date(end);
         start.setHours(end.getHours() - hours);
         setCustomRange({ from: toLocalDateTimeInput(start), to: toLocalDateTimeInput(end) });

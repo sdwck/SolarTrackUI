@@ -112,20 +112,24 @@ export function PredictionsCard({
                                     {getPredictionLabel(prediction.period)}
                                 </Typography>
                                 <Typography variant="body2" fontWeight="bold" color="primary.main" sx={{ fontSize: '0.85rem' }}>
-                                    {prediction.energyKWh.toFixed(1)} kWh
+                                    {/* {prediction.energyKWh.toFixed(1)} kWh */}
+                                    0.0 kWh
                                 </Typography>
                             </Box>
 
                             <Box display="flex" justifyContent="space-between" alignItems="center">
                                 <Chip
-                                    label={`${prediction.confidence}% confidence`}
-                                    color={getConfidenceColor(prediction.confidence)}
+                                    // label={`${prediction.confidence}% confidence`}
+                                    label={`0% confidence`}
+                                    // color={getConfidenceColor(prediction.confidence)}
+                                    color={getConfidenceColor(0)}
                                     size="small"
                                     variant="outlined"
                                     sx={{ fontSize: '0.7rem', height: 22 }}
                                 />
                                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                                    {prediction.factors.length} factors
+                                    {/* {prediction.factors.length} factors */}
+                                    1 factor
                                 </Typography>
                             </Box>
                         </Box>

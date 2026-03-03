@@ -22,7 +22,6 @@ import { DiagnosticAlertsCard } from '../../components/cards/DiagnosticAlertsCar
 import { MaintenanceCard } from '../../components/cards/MaintenanceCard';
 import { ThermalTrendChart } from '../../components/charts/ThermalTrendChart';
 import { VoltageStabilityChart } from '../../components/charts/VoltageStabilityChart';
-import { SystemUptimeChart } from '../../components/charts/SystemUptimeChart';
 import api from '../../services/api';
 
 interface HistoricalData {
@@ -56,7 +55,7 @@ export default function SystemHealthDiagnostics() {
             await fetchLatestData();
             setLastUpdate(new Date());
 
-            const data = await api.getSolarDataRange(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), new Date().toISOString(), 60);
+            const data = await api.getSolarDataRange("2026-01-24T08:51:36.8381549", "2026-01-31T08:51:36.8381549", 60);
             if (!data) {
                 setHistoricalData([]);
                 return;
@@ -209,10 +208,6 @@ export default function SystemHealthDiagnostics() {
                         />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                        <SystemUptimeChart
-                            data={historicalData}
-                            loading={loading}
-                        />
                     </Grid>
                 </Grid>
             </Container>
