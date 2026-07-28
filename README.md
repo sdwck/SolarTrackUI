@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://solartrack.runasp.net/"><b>Explore the Live Demo</b></a> •
-  <a href="https://github.com/sdwck/SolarPanel-Server"><b>Backend Repository</b></a>
+  <a href="https://github.com/sdwck/SolarTrack"><b>Backend Repository</b></a>
 </p>
 
 <p align="center">
